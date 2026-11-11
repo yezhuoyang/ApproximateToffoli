@@ -26,6 +26,7 @@ import ApproxToffoli.OneGate
 import ApproxToffoli.CurveMain
 import ApproxToffoli.CompilerContract
 import ApproxToffoli.WorstCase
+import ApproxToffoli.ExactLine
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
@@ -63,3 +64,5 @@ import ApproxToffoli.RankOneSpectral
 import ApproxToffoli.K2Diagonal
 import ApproxToffoli.TwoPhaseOrbit
 import ApproxToffoli.CPauliSplit
+import ApproxToffoli.PhaseTruncation
+import ApproxToffoli.EndpointDeterminant
