@@ -14,6 +14,7 @@ import ApproxToffoli.CutNormalForm
 import ApproxToffoli.LemmaT1
 import ApproxToffoli.CutBound
 import ApproxToffoli.CutMain
+import ApproxToffoli.CutPad
 import ApproxToffoli.TraceBound
 import ApproxToffoli.Basic
 import ApproxToffoli.Attainment
@@ -23,6 +24,8 @@ import ApproxToffoli.CurveWitnesses
 import ApproxToffoli.CurveThree
 import ApproxToffoli.OneGate
 import ApproxToffoli.CurveMain
+import ApproxToffoli.CompilerContract
+import ApproxToffoli.WorstCase
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
