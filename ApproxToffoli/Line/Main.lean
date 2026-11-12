@@ -11,7 +11,7 @@ import Mathlib
 import ApproxToffoli.Line.IncCirc
 import ApproxToffoli.Line.AddrWeight
 import ApproxToffoli.Line.SignConj
-import ApproxToffoli.Line.PhaseOpNs
+import ApproxToffoli.Line.PhaseOp
 
 namespace Line
 
@@ -121,11 +121,11 @@ theorem exactLine_66 : ExactLineGoal (fun N => 66 * (N - 1)) := by
     exists_increment hN
   have hm1 : 1 ≤ N - 1 := by omega
   have hmN : N - 1 + 1 ≤ N := by omega
-  have hF : circMat (Ph.phaseOp N (N - 1)
+  have hF : circMat (phaseOp N (N - 1)
         (fun j => Real.pi / 2 ^ (N - 1) * (wt a k (rippleTop k gap) j : ℝ)))
       = Matrix.diagonal (fun x : St N =>
           if wire x 0 then e (Real.pi / 2 ^ (N - 1) * (val a k gap x : ℝ)) else 1) := by
-    rw [Ph.circMat_phaseOp (N - 1) hm1 hmN]
+    rw [circMat_phaseOp (N - 1) hm1 hmN]
     congr 1
     funext x
     rw [ang_sum, sum_wt a k gap (N - 1) (by omega) (by omega) (by omega)]
@@ -135,12 +135,12 @@ theorem exactLine_66 : ExactLineGoal (fun N => 66 * (N - 1)) := by
     congr 1
     funext x
     exact hD x
-  refine ⟨exactCirc (Ph.phaseOp N (N - 1)
+  refine ⟨exactCirc (phaseOp N (N - 1)
       (fun j => Real.pi / 2 ^ (N - 1) * (wt a k (rippleTop k gap) j : ℝ))) inc ⟨0, h0⟩
       (Real.pi / 2 ^ (N - 1)),
-    unitaryGates_exactCirc (Ph.unitaryGates_phaseOp N _ _) hU _ _, ?_, ?_⟩
+    unitaryGates_exactCirc (unitaryGates_phaseOp N _ _) hU _ _, ?_, ?_⟩
   · show cnots _ ≤ 66 * (N - 1)
-    rw [cnots_exactCirc, Ph.cnots_phaseOp (N - 1) hm1 hmN]
+    rw [cnots_exactCirc, cnots_phaseOp (N - 1) hm1 hmN]
     omega
   · rw [circMat_exactCirc, hF, hA, commutator_eq_diagonal ι φ _ hφ, oneMat_pGate,
       mono_one_eq_diagonal, Matrix.diagonal_mul_diagonal,

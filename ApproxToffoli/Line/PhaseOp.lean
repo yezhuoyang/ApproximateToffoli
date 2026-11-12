@@ -60,20 +60,20 @@ def fanAux (N : ℕ) : ℕ → List (Gate N)
   | k + 1 => cxUp N (k + 1) ++ fanAux N k ++ cxUp N (k + 1)
 
 /-- The basis permutation of `fanAux N k`. -/
-def fanPerm (N : ℕ) : ℕ → Equiv.Perm (St N)
+def stairPerm (N : ℕ) : ℕ → Equiv.Perm (St N)
   | 0 => cxUpPerm N 0
-  | k + 1 => cxUpPerm N (k + 1) * fanPerm N k * cxUpPerm N (k + 1)
+  | k + 1 => cxUpPerm N (k + 1) * stairPerm N k * cxUpPerm N (k + 1)
 
 /-- The CNOT staircase `cx (m-1) m, …, cx 1 2, cx 0 1, cx 1 2, …, cx (m-1) m`. -/
 def fan (N m : ℕ) : List (Gate N) := fanAux N (m - 1)
 
 theorem circMat_fanAux (N k : ℕ) :
-    circMat (fanAux N k) = mono (fanPerm N k) (fun _ => (1 : ℂ)) := by
+    circMat (fanAux N k) = mono (stairPerm N k) (fun _ => (1 : ℂ)) := by
   induction k with
   | zero => exact circMat_cxUp N 0
   | succ k ih =>
     show circMat (cxUp N (k + 1) ++ fanAux N k ++ cxUp N (k + 1))
-      = mono (cxUpPerm N (k + 1) * fanPerm N k * cxUpPerm N (k + 1)) _
+      = mono (cxUpPerm N (k + 1) * stairPerm N k * cxUpPerm N (k + 1)) _
     rw [circMat_append, circMat_append, ih, circMat_cxUp, mono_mul, mono_mul]
     simp only [mul_one, mul_assoc]
 
@@ -96,8 +96,8 @@ theorem bool_xor3 (a b c : Bool) : xor (xor a b) (xor b c) = xor a c := by
   cases a <;> cases b <;> cases c <;> rfl
 
 /-- The staircase adds the bit of wire `0` to each of the wires `1 .. k + 1`. -/
-theorem wire_fanPerm (k : ℕ) (h : k + 1 < N) (x : St N) (i : ℕ) :
-    wire (fanPerm N k x) i
+theorem wire_stairPerm (k : ℕ) (h : k + 1 < N) (x : St N) (i : ℕ) :
+    wire (stairPerm N k x) i
       = if 1 ≤ i ∧ i ≤ k + 1 then xor (wire x i) (wire x 0) else wire x i := by
   induction k generalizing x i with
   | zero =>
@@ -106,16 +106,16 @@ theorem wire_fanPerm (k : ℕ) (h : k + 1 < N) (x : St N) (i : ℕ) :
     split_ifs <;> first | rfl | omega | (subst_vars; rfl)
   | succ k ih =>
     have hk : k + 1 < N := by omega
-    show wire (cxUpPerm N (k + 1) (fanPerm N k (cxUpPerm N (k + 1) x))) i = _
+    show wire (cxUpPerm N (k + 1) (stairPerm N k (cxUpPerm N (k + 1) x))) i = _
     simp only [wire_cxUpPerm (k + 1) h, ih hk]
     split_ifs <;> first | rfl | contradiction | omega | (subst_vars; exact bool_xor3 _ _ _)
 
 /-- The staircase is its own inverse. -/
-theorem fanPerm_fanPerm (k : ℕ) (h : k + 1 < N) (x : St N) :
-    fanPerm N k (fanPerm N k x) = x := by
+theorem stairPerm_stairPerm (k : ℕ) (h : k + 1 < N) (x : St N) :
+    stairPerm N k (stairPerm N k x) = x := by
   apply wire_ext
   intro i
-  rw [wire_fanPerm k h, wire_fanPerm k h, wire_fanPerm k h]
+  rw [wire_stairPerm k h, wire_stairPerm k h, wire_stairPerm k h]
   have h0 : ¬ (1 ≤ 0 ∧ 0 ≤ k + 1) := by omega
   rw [if_neg h0]
   split_ifs
@@ -124,11 +124,11 @@ theorem fanPerm_fanPerm (k : ℕ) (h : k + 1 < N) (x : St N) :
 
 /-- Conjugating a diagonal by the staircase permutes its entries. -/
 theorem fan_conj (k : ℕ) (h : k + 1 < N) (φ : St N → ℂ) :
-    mono (fanPerm N k) (fun _ => (1 : ℂ)) * mono 1 φ * mono (fanPerm N k) (fun _ => (1 : ℂ))
-      = mono 1 (fun x => φ (fanPerm N k x)) := by
+    mono (stairPerm N k) (fun _ => (1 : ℂ)) * mono 1 φ * mono (stairPerm N k) (fun _ => (1 : ℂ))
+      = mono 1 (fun x => φ (stairPerm N k x)) := by
   rw [mono_mul, mono_mul, mul_one]
   congr 1
-  · exact Equiv.ext (fanPerm_fanPerm k h)
+  · exact Equiv.ext (stairPerm_stairPerm k h)
   · funext x
     simp
 
@@ -262,13 +262,13 @@ theorem circMat_phaseOp (m : ℕ) (hm : 1 ≤ m) (hN : m + 1 ≤ N) (ang : ℕ �
   congr 1
   funext x
   have hs : (∑ j ∈ Finset.Icc 1 m,
-        if wire (fanPerm N (m - 1) x) j then -(ang j) / 2 else 0)
+        if wire (stairPerm N (m - 1) x) j then -(ang j) / 2 else 0)
       = ∑ j ∈ Finset.Icc 1 m, if xor (wire x j) (wire x 0) then -(ang j) / 2 else 0 := by
     apply Finset.sum_congr rfl
     intro j hj
     rw [Finset.mem_Icc] at hj
     have hc : 1 ≤ j ∧ j ≤ m - 1 + 1 := ⟨hj.1, by omega⟩
-    rw [wire_fanPerm _ hk, if_pos hc]
+    rw [wire_stairPerm _ hk, if_pos hc]
   rw [hs]
   exact phase_arith m ang (wire x 0) (fun j => wire x j)
 
