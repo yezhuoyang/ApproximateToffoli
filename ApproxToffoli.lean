@@ -79,6 +79,12 @@ import ApproxToffoli.Free.ValeCells
 import ApproxToffoli.Free.ValeMcx
 import ApproxToffoli.Free.ValeMcrz
 import ApproxToffoli.Free.ValeMain
+import ApproxToffoli.Free.CirqDefs
+import ApproxToffoli.Free.CirqCells
+import ApproxToffoli.Free.CirqLadder
+import ApproxToffoli.Free.CirqSplit
+import ApproxToffoli.Free.CirqRec
+import ApproxToffoli.Free.CirqMain
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
