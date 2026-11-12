@@ -37,6 +37,7 @@ import ApproxToffoli.Line.Ripple
 import ApproxToffoli.Line.RippleAdd
 import ApproxToffoli.Line.PhaseOp
 import ApproxToffoli.Line.Commute
+import ApproxToffoli.Line.Cells2
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
