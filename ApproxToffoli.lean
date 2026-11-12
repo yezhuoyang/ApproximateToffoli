@@ -40,6 +40,7 @@ import ApproxToffoli.Line.Commute
 import ApproxToffoli.Line.Cells2
 import ApproxToffoli.Line.Centre
 import ApproxToffoli.Line.CentreSpec
+import ApproxToffoli.Line.LowInc
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
