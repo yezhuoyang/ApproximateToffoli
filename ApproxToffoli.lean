@@ -31,6 +31,7 @@ import ApproxToffoli.Line.Model
 import ApproxToffoli.Line.Mono
 import ApproxToffoli.Line.Rccx
 import ApproxToffoli.Line.Inverse
+import ApproxToffoli.Line.Toggle
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
