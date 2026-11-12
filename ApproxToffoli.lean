@@ -45,6 +45,7 @@ import ApproxToffoli.Line.LowIncWire
 import ApproxToffoli.Line.LowIncArith
 import ApproxToffoli.Line.LowIncSpec
 import ApproxToffoli.Line.LowIncCentre
+import ApproxToffoli.Line.LowIncMain
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
