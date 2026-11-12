@@ -48,6 +48,10 @@ import ApproxToffoli.Line.LowIncCentre
 import ApproxToffoli.Line.LowIncMain
 import ApproxToffoli.Line.Increment
 import ApproxToffoli.Line.IncCirc
+import ApproxToffoli.Line.AddrWeight
+import ApproxToffoli.Line.SignConj
+import ApproxToffoli.Line.PhaseOpNs
+import ApproxToffoli.Line.Main
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
