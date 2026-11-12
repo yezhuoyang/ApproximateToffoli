@@ -27,6 +27,9 @@ import ApproxToffoli.CurveMain
 import ApproxToffoli.CompilerContract
 import ApproxToffoli.WorstCase
 import ApproxToffoli.ExactLine
+import ApproxToffoli.Line.Model
+import ApproxToffoli.Line.Mono
+import ApproxToffoli.Line.Rccx
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
