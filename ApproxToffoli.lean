@@ -74,6 +74,11 @@ import ApproxToffoli.Free.DspDefs
 import ApproxToffoli.Free.DspCells
 import ApproxToffoli.Free.DspPass
 import ApproxToffoli.Free.DspMain
+import ApproxToffoli.Free.ValeDefs
+import ApproxToffoli.Free.ValeCells
+import ApproxToffoli.Free.ValeMcx
+import ApproxToffoli.Free.ValeMcrz
+import ApproxToffoli.Free.ValeMain
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
