@@ -70,6 +70,10 @@ import ApproxToffoli.Free.QulinTop
 import ApproxToffoli.Free.QulinMat
 import ApproxToffoli.Free.QulinMain
 import ApproxToffoli.Free.Compare
+import ApproxToffoli.Free.DspDefs
+import ApproxToffoli.Free.DspCells
+import ApproxToffoli.Free.DspPass
+import ApproxToffoli.Free.DspMain
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
