@@ -51,6 +51,12 @@ import ApproxToffoli.Line.IncCirc
 import ApproxToffoli.Line.AddrWeight
 import ApproxToffoli.Line.SignConj
 import ApproxToffoli.Line.Main
+import ApproxToffoli.Line.TModel
+import ApproxToffoli.Line.TGates
+import ApproxToffoli.Line.TCount
+import ApproxToffoli.Line.TBlocks
+import ApproxToffoli.Line.TInc
+import ApproxToffoli.Line.TMain
 import ApproxToffoli.Block
 import ApproxToffoli.BlockResidual
 import ApproxToffoli.Budget3Red
