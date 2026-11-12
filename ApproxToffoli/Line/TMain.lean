@@ -29,12 +29,12 @@ theorem trle_exactCirc {F inc : List (Gate N)} {TI RF : ℕ} (hF : TRle F 0 RF)
 theorem exists_increment_T_aux {a k : ℕ} {gap : Bool} (ha : 2 ≤ a) (hka : k ≤ a)
     (hat : 2 * a ≤ rippleTop k gap) (ht : rippleTop k gap = N - 1) (hN : 4 ≤ N)
     (hs : a + (k + 1) = N - 1)
-    (hc : 2 * (13 * k + (if gap then 4 else 1)) + (8 * a - 9) + (24 * a - 19)
-      ≤ 29 * (N - 1))
+    (hc : 2 * (13 * k + (if gap then 4 else 1)) + (8 * a - 9) + (24 * a - 23)
+      = incCnots N)
     (hT : 16 * k + 20 * a - 20 ≤ 18 * (N - 1)) :
     ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
       k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
-      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      UnitaryGates inc ∧ cnots inc = incCnots N ∧ UMono (circMat inc) ι ∧
       (∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
         val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1))) ∧
       TRle inc (18 * (N - 1)) 0 := by
@@ -51,12 +51,12 @@ theorem exists_increment_T_aux {a k : ℕ} {gap : Bool} (ha : 2 ≤ a) (hka : k 
   · rw [← hs]
     exact hs'
 
-/-- **The increment on a line, with its T count.**  The increment of
-`exists_increment` has at most `18 (N - 1)` T gates and no rotation. -/
-theorem exists_increment_T (hN : 4 ≤ N) :
+/-- **The increment on a line, with its exact CNOT count and its T count.**  The
+increment of `exists_increment_count` has at most `18 (N - 1)` T gates and no rotation. -/
+theorem exists_increment_T_count (hN : 4 ≤ N) :
     ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
       k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
-      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      UnitaryGates inc ∧ cnots inc = incCnots N ∧ UMono (circMat inc) ι ∧
       (∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
         val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1))) ∧
       TRle inc (18 * (N - 1)) 0 := by
@@ -72,34 +72,58 @@ theorem exists_increment_T (hN : 4 ≤ N) :
           unitaryGates_nil)), ?_, hι, hs,
       trle_mono (trle_inc_small 4 1 false _) (by decide) le_rfl⟩
     rw [cnots_incOf, cnots_ripple 1 false (by decide)]
-    exact (by decide : 2 * (13 * 1 + 1) + 1 + 1 ≤ 29 * (4 - 1))
+    exact (by decide : 2 * (13 * 1 + 1) + 1 + 1 = incCnots 4)
   · rcases Nat.even_or_odd' (N - 1) with ⟨a, ha | ha⟩
-    · refine exists_increment_T_aux (a := a) (k := a - 1) (gap := true) (by omega) (by omega)
+    · have hi : incCnots N = 29 * (N - 1) - 50 := by
+        rw [incCnots, if_neg (by omega), if_pos (by omega)]
+      refine exists_increment_T_aux (a := a) (k := a - 1) (gap := true) (by omega) (by omega)
         ?_ ?_ hN (by omega) ?_ (by omega)
       · rw [rippleTop_true]
         omega
       · rw [rippleTop_true]
         omega
-      · simp only [↓reduceIte]
+      · rw [hi]
+        simp only [↓reduceIte]
         omega
-    · refine exists_increment_T_aux (a := a) (k := a) (gap := false) (by omega) le_rfl
+    · have hi : incCnots N = 29 * (N - 1) - 59 := by
+        rw [incCnots, if_neg (by omega), if_neg (by omega)]
+      refine exists_increment_T_aux (a := a) (k := a) (gap := false) (by omega) le_rfl
         ?_ ?_ hN (by omega) ?_ (by omega)
       · rw [rippleTop_false]
         omega
       · rw [rippleTop_false]
         omega
-      · simp only [Bool.false_eq_true, ↓reduceIte]
+      · rw [hi]
+        simp only [Bool.false_eq_true, ↓reduceIte]
         omega
 
-/-- **Exact synthesis on a line with CNOT, T and rotation counts.**  For every `N ≥ 4`
-the conditional is exactly a circuit of adjacent CNOTs and unitary one-qubit gates with
-at most `66 (N - 1)` CNOTs, whose one-qubit gates split into Clifford+T gates with at
-most `36 (N - 1)` T gates and at most `4 N - 1` phase gates of arbitrary angle. -/
-theorem exactLine_66_T : ExactLineTGoal := by
+/-- **The increment on a line, with its T count.**  The increment of
+`exists_increment` has at most `18 (N - 1)` T gates and no rotation. -/
+theorem exists_increment_T (hN : 4 ≤ N) :
+    ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
+      k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
+      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      (∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
+        val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1))) ∧
+      TRle inc (18 * (N - 1)) 0 := by
+  obtain ⟨a, k, gap, inc, ι, h1, h2, h3, h4, h5, h6, h7⟩ := exists_increment_T_count hN
+  exact ⟨a, k, gap, inc, ι, h1, h2, h3, h4, h5, le_of_eq_of_le h6 (incCnots_le N hN), h7⟩
+
+/-- **Exact synthesis on a line with the paper's CNOT count and with T and rotation
+counts.**  For every `N ≥ 4` the conditional is exactly a circuit of adjacent CNOTs and
+unitary one-qubit gates with exactly `lineCnots N` CNOTs (`80` for `N = 4`,
+`66 (N - 1) - 104` for odd `N ≥ 5`, `66 (N - 1) - 122` for even `N ≥ 6`), whose
+one-qubit gates split into Clifford+T gates with at most `36 (N - 1)` T gates and at
+most `4 N - 1` phase gates of arbitrary angle. -/
+theorem exactLine_count_T : ∀ N : ℕ, (hN : 4 ≤ N) →
+    ∃ c : List (Gate N),
+      UnitaryGates c ∧ cnots c = lineCnots N ∧
+      circMat c = condMat (⟨0, by omega⟩ : Fin N) ∧
+      ∃ t r : ℕ, TR c t r ∧ t ≤ 36 * (N - 1) ∧ r ≤ 4 * N - 1 := by
   intro N hN
   have h0 : 0 < N := by omega
   obtain ⟨a, k, gap, inc, ι, hka, hat, ht, hs, hU, hc, ⟨φ, hφ, hA⟩, hι, hT⟩ :=
-    exists_increment_T hN
+    exists_increment_T_count hN
   have hm1 : 1 ≤ N - 1 := by omega
   have hmN : N - 1 + 1 ≤ N := by omega
   have hF : circMat (phaseOp N (N - 1)
@@ -120,13 +144,21 @@ theorem exactLine_66_T : ExactLineTGoal := by
       (fun j => Real.pi / 2 ^ (N - 1) * (wt a k (rippleTop k gap) j : ℝ))) inc ⟨0, h0⟩
       (Real.pi / 2 ^ (N - 1)),
     unitaryGates_exactCirc (unitaryGates_phaseOp N _ _) hU _ _, ?_, ?_, ?_⟩
-  · rw [cnots_exactCirc, cnots_phaseOp (N - 1) hm1 hmN]
-    omega
+  · rw [cnots_exactCirc, cnots_phaseOp (N - 1) hm1 hmN, hc, lineCnots_eq N hN]
   · rw [circMat_exactCirc, hF, hA, commutator_eq_diagonal ι φ _ hφ, oneMat_pGate,
       mono_one_eq_diagonal, Matrix.diagonal_mul_diagonal,
       hS _ (sign_entry hka hat ht hs h0 ι hι)]
     exact hGate_sign_hGate _
   · exact trle_mono (trle_exactCirc (trle_phaseOp N (N - 1) _) hT _ _) (by omega) (by omega)
+
+/-- **Exact synthesis on a line with CNOT, T and rotation counts.**  For every `N ≥ 4`
+the conditional is exactly a circuit of adjacent CNOTs and unitary one-qubit gates with
+at most `66 (N - 1)` CNOTs, whose one-qubit gates split into Clifford+T gates with at
+most `36 (N - 1)` T gates and at most `4 N - 1` phase gates of arbitrary angle. -/
+theorem exactLine_66_T : ExactLineTGoal := by
+  intro N hN
+  obtain ⟨c, hU, hc, hM, hT⟩ := exactLine_count_T N hN
+  exact ⟨c, hU, le_of_eq_of_le hc (lineCnots_le N hN), hM, hT⟩
 
 /-- **The resource estimate.**  With at most `36 (N - 1)` T gates and at most `4 N - 1`
 rotations, the estimate is at most `36 (N - 1) + 3 (4 N - 1) log2 ((4 N - 1) / ε)`. -/

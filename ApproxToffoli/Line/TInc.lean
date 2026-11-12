@@ -32,11 +32,19 @@ theorem trle_halvesAt (N o n : ℕ) : TRle (halvesAt N o n) (2 * n) 0 := by
   | succ n ih =>
     exact trle_mono (trle_append (trle_jHalfAt N o) (ih (o + 2))) (by omega) le_rfl
 
-theorem trle_coreAt (N o : ℕ) : TRle (coreAt N o) 8 0 := by
+/-- The seven-CNOT cell has four T gates (`P(±π/4)`) and two Hadamard gates. -/
+theorem trle_gap7 (q s t u : Fin N) (hqs : q.val + 1 = s.val ∨ s.val + 1 = q.val)
+    (hst : s.val + 1 = t.val ∨ t.val + 1 = s.val)
+    (htu : t.val + 1 = u.val ∨ u.val + 1 = t.val) : TRle (gap7 q s t u hqs hst htu) 4 0 :=
+  trle_h _ (trle_one _ tcost_pGate_quarter (trle_cx _ _ _
+    (trle_one _ tcost_pGate_neg_quarter' (trle_cx _ _ _ (trle_cx _ _ _ (trle_cx _ _ _
+      (trle_cx _ _ _ (trle_one _ tcost_pGate_quarter (trle_cx _ _ _
+        (trle_one _ tcost_pGate_neg_quarter' (trle_cx _ _ _ (trle_h _ trle_nil))))))))))))
+
+theorem trle_coreAt (N o : ℕ) : TRle (coreAt N o) 4 0 := by
   unfold coreAt
   split_ifs
-  · exact trle_append (trle_append (trle_rtof5 _ _ _ _ _) (trle_cx _ _ _ trle_nil))
-      (trle_rtof5 _ _ _ _ _)
+  · exact trle_gap7 _ _ _ _ _ _ _
   · exact trle_mono trle_nil (by omega) le_rfl
 
 /-- The centre has at most `4 a` T gates. -/

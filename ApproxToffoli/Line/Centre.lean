@@ -1,5 +1,5 @@
 /-
-The centre circuit on a line: `6 a + 1` CNOTs.
+The centre circuit on a line: `6 a - 3` CNOTs.
 
 Wires (natural-number positions): `S_i = 2a - 2i` (`0 ≤ i ≤ a`), `T_i = 2a - 2i - 1`
 (`0 ≤ i < a`).  The circuit
@@ -16,7 +16,7 @@ and the proof that it is a permutation up to phases.  The basis action is comput
 `CentreSpec.lean`.
 -/
 import Mathlib
-import ApproxToffoli.Line.Cells2
+import ApproxToffoli.Line.GapCell
 
 namespace Line
 
@@ -191,49 +191,44 @@ theorem circOn_rtof5 (c1 c2 t : Fin N) (h1 : c1.val + 1 = c2.val ∨ c2.val + 1 
     | exact ⟨p2, pt⟩
     | exact ⟨p1, p2⟩
 
-/-- The core on wires `o, …, o + 3`: two relative-phase Toffolis with controls `o + 2`,
-`o + 1` and target `o`, around a CNOT from `o + 3` to `o + 2`.  Eleven CNOTs. -/
+/-- The core on wires `o, …, o + 3`: the seven-CNOT cell `gap7` with `q = o + 3`,
+`s = o + 2`, `t = o + 1`, `u = o`.  Its basis action is `(o + 2) ^= (o + 3)` and
+`o ^= (o + 3) ∧ (o + 1)`.  Seven CNOTs. -/
 noncomputable def coreAt (N o : ℕ) : List (Gate N) :=
   if h : o + 3 < N then
-    rtof5 ⟨o + 2, by omega⟩ ⟨o + 1, by omega⟩ ⟨o, by omega⟩ (Or.inr rfl) (Or.inr rfl)
-      ++ [.cx ⟨o + 3, h⟩ ⟨o + 2, by omega⟩ (Or.inr rfl)]
-      ++ rtof5 ⟨o + 2, by omega⟩ ⟨o + 1, by omega⟩ ⟨o, by omega⟩ (Or.inr rfl) (Or.inr rfl)
+    gap7 ⟨o + 3, h⟩ ⟨o + 2, by omega⟩ ⟨o + 1, by omega⟩ ⟨o, by omega⟩ (Or.inr rfl)
+      (Or.inr rfl) (Or.inr rfl)
   else []
 
-/-- The basis permutation of the core, as the product of its three parts. -/
+/-- The basis permutation of the core: the CNOT from `o + 3` to `o + 2` and the Toffoli
+with controls `o + 3`, `o + 1` and target `o`. -/
 def corePermAt (N o : ℕ) : Equiv.Perm (St N) :=
   if h : o + 3 < N then
-    ccPerm ⟨o + 2, by omega⟩ ⟨o, by omega⟩ ⟨o + 1, by omega⟩ (by simp) (by simp)
-      * (cxPerm ⟨o + 3, h⟩ ⟨o + 2, by omega⟩ (by simp)
-        * ccPerm ⟨o + 2, by omega⟩ ⟨o, by omega⟩ ⟨o + 1, by omega⟩ (by simp) (by simp))
+    cxPerm ⟨o + 3, h⟩ ⟨o + 2, by omega⟩ (by simp)
+      * ccPerm ⟨o + 3, h⟩ ⟨o, by omega⟩ ⟨o + 1, by omega⟩ (by simp) (by simp)
   else 1
 
-theorem cnots_coreAt (o : ℕ) (h : o + 3 < N) : cnots (coreAt N o) = 11 := by
+theorem cnots_coreAt (o : ℕ) (h : o + 3 < N) : cnots (coreAt N o) = 7 := by
   rw [coreAt, dif_pos h]
   rfl
 
 theorem unitaryGates_coreAt (N o : ℕ) : UnitaryGates (coreAt N o) := by
   unfold coreAt
   split_ifs
-  · exact unitaryGates_append (unitaryGates_append (unitaryGates_rtof5 _ _ _ _ _)
-      (unitaryGates_cons_cx _ _ _ unitaryGates_nil)) (unitaryGates_rtof5 _ _ _ _ _)
+  · exact unitaryGates_gap7 _ _ _ _ _ _ _
   · exact unitaryGates_nil
 
 theorem umono_coreAt (N o : ℕ) : UMono (circMat (coreAt N o)) (corePermAt N o) := by
   by_cases h : o + 3 < N
   · rw [coreAt, dif_pos h, corePermAt, dif_pos h]
-    exact umono_append (umono_append (umono_rtof5 _ _ _ _ _ (by simp))
-      (umono_single (umono_cx _ _ _))) (umono_rtof5 _ _ _ _ _ (by simp))
+    exact umono_gap7 _ _ _ _ _ _ _ (by simp) (by simp) (by simp)
   · rw [coreAt, dif_neg h, corePermAt, dif_neg h]
     exact umono_nil
 
 theorem above_coreAt (N o : ℕ) : Above o (coreAt N o) := by
   unfold coreAt
   split_ifs
-  · refine circOn_append.2 ⟨circOn_append.2 ⟨?_, ?_⟩, ?_⟩
-    · exact circOn_rtof5 _ _ _ _ _ _ (by simp) (by simp) (by simp)
-    · exact circOn_cons.2 ⟨⟨by simp, by simp⟩, circOn_nil _⟩
-    · exact circOn_rtof5 _ _ _ _ _ _ (by simp) (by simp) (by simp)
+  · exact circOn_gap7 _ _ _ _ _ _ _ _ (by simp) (by simp) (by simp) (by simp)
   · exact circOn_nil _
 
 /-! ### The nested circuit -/
@@ -277,7 +272,7 @@ theorem unitaryGates_nest (N o n : ℕ) : UnitaryGates (nest N o n) := by
     exact unitaryGates_append (unitaryGates_append (unitaryGates_jHalfAt N o) (ih (o + 2)))
       (unitaryGates_invCirc (unitaryGates_jHalfAt N o))
 
-theorem cnots_nest (o n : ℕ) (h : o + 2 * n + 3 < N) : cnots (nest N o n) = 6 * n + 11 := by
+theorem cnots_nest (o n : ℕ) (h : o + 2 * n + 3 < N) : cnots (nest N o n) = 6 * n + 7 := by
   induction n generalizing o with
   | zero => exact cnots_coreAt o (by omega)
   | succ n ih =>

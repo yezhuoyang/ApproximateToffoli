@@ -111,14 +111,32 @@ theorem unitaryGates_exactCirc {F inc : List (Gate N)} (hF : UnitaryGates F)
 
 /-! ### The theorem -/
 
-/-- **Exact synthesis on a line with at most `66 (N - 1)` CNOTs.**  For every `N ≥ 4`
-there is a circuit of adjacent CNOTs and unitary one-qubit gates, with at most
-`66 (N - 1)` CNOTs, whose matrix is exactly the conditional with target qubit `0`. -/
-theorem exactLine_66 : ExactLineGoal (fun N => 66 * (N - 1)) := by
-  intro N hN
+/-- CNOT count of the construction: `80` for `N = 4`; with `m = N - 1`, `66 m - 104` for
+even `m ≥ 4` and `66 m - 122` for odd `m ≥ 5`. -/
+def lineCnots (N : ℕ) : ℕ :=
+  if N = 4 then 80 else if N % 2 = 1 then 66 * (N - 1) - 104 else 66 * (N - 1) - 122
+
+/-- The count is that of two phase operations (`4 (N - 1) - 2` CNOTs each) and two
+increments (`incCnots N` CNOTs each). -/
+theorem lineCnots_eq (N : ℕ) (hN : 4 ≤ N) :
+    lineCnots N = 2 * (4 * (N - 1) - 2) + 2 * incCnots N := by
+  unfold lineCnots incCnots
+  split_ifs <;> omega
+
+theorem lineCnots_le (N : ℕ) (hN : 4 ≤ N) : lineCnots N ≤ 66 * (N - 1) := by
+  unfold lineCnots
+  split_ifs <;> omega
+
+/-- **Exact synthesis on a line with exactly `lineCnots N` CNOTs.**  For every `N ≥ 4`
+there is a circuit of adjacent CNOTs and unitary one-qubit gates, with exactly
+`lineCnots N` CNOTs, whose matrix is exactly the conditional with target qubit `0`. -/
+theorem exactLine_count_eq (N : ℕ) (hN : 4 ≤ N) :
+    ∃ c : List (Gate N),
+      UnitaryGates c ∧ cnots c = lineCnots N ∧
+      circMat c = condMat (⟨0, by omega⟩ : Fin N) := by
   have h0 : 0 < N := by omega
   obtain ⟨a, k, gap, inc, ι, hka, hat, ht, hs, hU, hc, ⟨φ, hφ, hA⟩, hι⟩ :=
-    exists_increment hN
+    exists_increment_count hN
   have hm1 : 1 ≤ N - 1 := by omega
   have hmN : N - 1 + 1 ≤ N := by omega
   have hF : circMat (phaseOp N (N - 1)
@@ -139,12 +157,26 @@ theorem exactLine_66 : ExactLineGoal (fun N => 66 * (N - 1)) := by
       (fun j => Real.pi / 2 ^ (N - 1) * (wt a k (rippleTop k gap) j : ℝ))) inc ⟨0, h0⟩
       (Real.pi / 2 ^ (N - 1)),
     unitaryGates_exactCirc (unitaryGates_phaseOp N _ _) hU _ _, ?_, ?_⟩
-  · show cnots _ ≤ 66 * (N - 1)
-    rw [cnots_exactCirc, cnots_phaseOp (N - 1) hm1 hmN]
-    omega
+  · rw [cnots_exactCirc, cnots_phaseOp (N - 1) hm1 hmN, hc, lineCnots_eq N hN]
   · rw [circMat_exactCirc, hF, hA, commutator_eq_diagonal ι φ _ hφ, oneMat_pGate,
       mono_one_eq_diagonal, Matrix.diagonal_mul_diagonal,
       hS _ (sign_entry hka hat ht hs h0 ι hι)]
     exact hGate_sign_hGate _
+
+/-- **Exact synthesis on a line with the paper's CNOT count**: at most `lineCnots N`
+CNOTs, that is `80` for `N = 4`, `66 (N - 1) - 104` for odd `N ≥ 5` and
+`66 (N - 1) - 122` for even `N ≥ 6`. -/
+theorem exactLine_count : ExactLineGoal lineCnots := by
+  intro N hN
+  obtain ⟨c, hU, hc, hM⟩ := exactLine_count_eq N hN
+  exact ⟨c, hU, hc.le, hM⟩
+
+/-- **Exact synthesis on a line with at most `66 (N - 1)` CNOTs.**  For every `N ≥ 4`
+there is a circuit of adjacent CNOTs and unitary one-qubit gates, with at most
+`66 (N - 1)` CNOTs, whose matrix is exactly the conditional with target qubit `0`. -/
+theorem exactLine_66 : ExactLineGoal (fun N => 66 * (N - 1)) := by
+  intro N hN
+  obtain ⟨c, hU, hc, hM⟩ := exactLine_count_eq N hN
+  exact ⟨c, hU, le_of_eq_of_le hc (lineCnots_le N hN), hM⟩
 
 end Line

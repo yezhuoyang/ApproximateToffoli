@@ -1,5 +1,5 @@
 /-
-The low incrementer on a line: `24 a - 19` CNOTs.
+The low incrementer on a line: `24 a - 23` CNOTs.
 
 Wires (natural-number positions): `S_i = 2a - 2i` (`0 ≤ i ≤ a`), `T_i = 2a - 2i - 1`
 (`0 ≤ i < a`).  The circuit
@@ -268,8 +268,8 @@ theorem umono_rest (N a : ℕ) : UMono (circMat (rest N a)) (restPerm N a) := by
   · rw [rest, dif_neg h, restPerm, dif_neg h]
     exact umono_nil
 
-/-- **The low incrementer has `24 a - 19` CNOTs.** -/
-theorem cnots_lowInc {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) : cnots (lowInc N a) = 24 * a - 19 := by
+/-- **The low incrementer has `24 a - 23` CNOTs.** -/
+theorem cnots_lowInc {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) : cnots (lowInc N a) = 24 * a - 23 := by
   rw [lowInc, cnots_append, cnots_append, cnots_append, cnots_invCirc, cnots_rest h,
     cnots_centre h, terminal, cnots_xsAt]
   omega

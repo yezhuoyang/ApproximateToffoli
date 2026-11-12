@@ -166,14 +166,23 @@ theorem inc_small {k : ℕ} {gap : Bool} (hk : k ≤ 1) (hat : 2 ≤ rippleTop k
 
 /-! ### Every `N ≥ 4` -/
 
+/-- The CNOT count of the increment: `30` for `N = 4`; with `m = N - 1`, `29 m - 50` for
+even `m ≥ 4` and `29 m - 59` for odd `m ≥ 5`. -/
+def incCnots (N : ℕ) : ℕ :=
+  if N = 4 then 30 else if N % 2 = 1 then 29 * (N - 1) - 50 else 29 * (N - 1) - 59
+
+theorem incCnots_le (N : ℕ) (hN : 4 ≤ N) : incCnots N ≤ 29 * (N - 1) := by
+  unfold incCnots
+  split_ifs <;> omega
+
 theorem exists_increment_aux {a k : ℕ} {gap : Bool} (ha : 2 ≤ a) (hka : k ≤ a)
     (hat : 2 * a ≤ rippleTop k gap) (ht : rippleTop k gap = N - 1) (hN : 4 ≤ N)
     (hs : a + (k + 1) = N - 1)
-    (hc : 2 * (13 * k + (if gap then 4 else 1)) + (8 * a - 9) + (24 * a - 19)
-      ≤ 29 * (N - 1)) :
+    (hc : 2 * (13 * k + (if gap then 4 else 1)) + (8 * a - 9) + (24 * a - 23)
+      = incCnots N) :
     ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
       k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
-      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      UnitaryGates inc ∧ cnots inc = incCnots N ∧ UMono (circMat inc) ι ∧
       ∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
         val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1)) := by
   have hN' : rippleTop k gap < N := by omega
@@ -188,13 +197,13 @@ theorem exists_increment_aux {a k : ℕ} {gap : Bool} (ha : 2 ≤ a) (hka : k �
   · rw [← hs]
     exact hs'
 
-/-- **The increment on a line.**  For every `N ≥ 4` there is a circuit with at most
-`29 (N - 1)` CNOTs that is, up to phases, a permutation `ι` leaving wire `0` unchanged
-and adding one to the address modulo `2^(N-1)` when wire `0` is one. -/
-theorem exists_increment (hN : 4 ≤ N) :
+/-- **The increment on a line, with its exact CNOT count.**  For every `N ≥ 4` there is a
+circuit with exactly `incCnots N` CNOTs that is, up to phases, a permutation `ι` leaving
+wire `0` unchanged and adding one to the address modulo `2^(N-1)` when wire `0` is one. -/
+theorem exists_increment_count (hN : 4 ≤ N) :
     ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
       k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
-      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      UnitaryGates inc ∧ cnots inc = incCnots N ∧ UMono (circMat inc) ι ∧
       ∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
         val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1)) := by
   rcases Nat.lt_or_ge N 5 with h5 | h5
@@ -208,23 +217,41 @@ theorem exists_increment (hN : 4 ≤ N) :
         (unitaryGates_cons_cx _ _ _ (unitaryGates_cons_one _ xGate_unitary
           unitaryGates_nil)), ?_, hι, hs⟩
     rw [cnots_incOf, cnots_ripple 1 false (by decide)]
-    exact (by decide : 2 * (13 * 1 + 1) + 1 + 1 ≤ 29 * (4 - 1))
+    exact (by decide : 2 * (13 * 1 + 1) + 1 + 1 = incCnots 4)
   · rcases Nat.even_or_odd' (N - 1) with ⟨a, ha | ha⟩
-    · refine exists_increment_aux (a := a) (k := a - 1) (gap := true) (by omega) (by omega)
+    · have hi : incCnots N = 29 * (N - 1) - 50 := by
+        rw [incCnots, if_neg (by omega), if_pos (by omega)]
+      refine exists_increment_aux (a := a) (k := a - 1) (gap := true) (by omega) (by omega)
         ?_ ?_ hN (by omega) ?_
       · rw [rippleTop_true]
         omega
       · rw [rippleTop_true]
         omega
-      · simp only [↓reduceIte]
+      · rw [hi]
+        simp only [↓reduceIte]
         omega
-    · refine exists_increment_aux (a := a) (k := a) (gap := false) (by omega) le_rfl
+    · have hi : incCnots N = 29 * (N - 1) - 59 := by
+        rw [incCnots, if_neg (by omega), if_neg (by omega)]
+      refine exists_increment_aux (a := a) (k := a) (gap := false) (by omega) le_rfl
         ?_ ?_ hN (by omega) ?_
       · rw [rippleTop_false]
         omega
       · rw [rippleTop_false]
         omega
-      · simp only [Bool.false_eq_true, ↓reduceIte]
+      · rw [hi]
+        simp only [Bool.false_eq_true, ↓reduceIte]
         omega
+
+/-- **The increment on a line.**  For every `N ≥ 4` there is a circuit with at most
+`29 (N - 1)` CNOTs that is, up to phases, a permutation `ι` leaving wire `0` unchanged
+and adding one to the address modulo `2^(N-1)` when wire `0` is one. -/
+theorem exists_increment (hN : 4 ≤ N) :
+    ∃ (a k : ℕ) (gap : Bool) (inc : List (Gate N)) (ι : Equiv.Perm (St N)),
+      k ≤ a ∧ 2 * a ≤ rippleTop k gap ∧ rippleTop k gap = N - 1 ∧ a + (k + 1) = N - 1 ∧
+      UnitaryGates inc ∧ cnots inc ≤ 29 * (N - 1) ∧ UMono (circMat inc) ι ∧
+      ∀ x : St N, wire (ι x) 0 = wire x 0 ∧ (wire x 0 = true →
+        val a k gap (ι x) = (val a k gap x + 1) % 2 ^ (N - 1)) := by
+  obtain ⟨a, k, gap, inc, ι, h1, h2, h3, h4, h5, h6, h7⟩ := exists_increment_count hN
+  exact ⟨a, k, gap, inc, ι, h1, h2, h3, h4, h5, le_of_eq_of_le h6 (incCnots_le N hN), h7⟩
 
 end Line

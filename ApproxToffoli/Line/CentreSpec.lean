@@ -1,5 +1,5 @@
 /-
-The basis action of the centre circuit (`6 a + 1` CNOTs) on a line.
+The basis action of the centre circuit (`6 a - 3` CNOTs) on a line.
 
 Wires: `S_i = 2a - 2i` (`0 ≤ i ≤ a`), `T_i = 2a - 2i - 1` (`0 ≤ i < a`).  With
 `p = x(S_0) ⊕ x(T_0)`, the circuit `centre N a` is, up to phases of modulus one, the
@@ -81,22 +81,12 @@ theorem jPermAt_inv_wire (o : ℕ) (h : o + 2 < N) (y : St N) (j : ℕ) :
   exact jPerm_inv_wire _ _ _ _ _ (by simp) y j
 
 /-- The core on basis states: `q2 ^= q3`, `q0 ^= q3 ∧ q1`. -/
-theorem core_apply (q0 q1 q2 q3 : Fin N) (h20 : q2 ≠ q0) (h10 : q1 ≠ q0) (h32 : q3 ≠ q2)
-    (h12 : q1 ≠ q2) (h30 : q3 ≠ q0) (x : St N) :
-    (ccPerm q2 q0 q1 h20 h10 * (cxPerm q3 q2 h32 * ccPerm q2 q0 q1 h20 h10)) x
+theorem core_apply (q0 q1 q2 q3 : Fin N) (h30 : q3 ≠ q0) (h10 : q1 ≠ q0) (h32 : q3 ≠ q2)
+    (h20 : q2 ≠ q0) (x : St N) :
+    (cxPerm q3 q2 h32 * ccPerm q3 q0 q1 h30 h10) x
       = Function.update (Function.update x q2 (xor (x q2) (x q3))) q0
-          (xor (x q0) (x q3 && x q1)) := by
-  funext r
-  simp only [Equiv.Perm.mul_apply, ccPerm_apply, cxPerm_apply]
-  by_cases hr : r = q0
-  · rw [hr]
-    simp only [Function.update_self, Function.update_of_ne h20, Function.update_of_ne h20.symm,
-      Function.update_of_ne h10, Function.update_of_ne h30, Function.update_of_ne h12]
-    cases x q0 <;> cases x q1 <;> cases x q2 <;> cases x q3 <;> rfl
-  · by_cases hr' : r = q2
-    · rw [hr']
-      simp only [Function.update_self, Function.update_of_ne h20, Function.update_of_ne h30]
-    · simp only [Function.update_of_ne hr, Function.update_of_ne hr']
+          (xor (x q0) (x q3 && x q1)) :=
+  gapPerm_apply q3 q2 q1 q0 h32 h30 h10 h20 x
 
 theorem corePermAt_wire (o : ℕ) (h : o + 3 < N) (x : St N) (j : ℕ) :
     wire (corePermAt N o x) j
@@ -105,7 +95,7 @@ theorem corePermAt_wire (o : ℕ) (h : o + 3 < N) (x : St N) (j : ℕ) :
         else wire x j := by
   rw [corePermAt, dif_pos h,
     core_apply ⟨o, by omega⟩ ⟨o + 1, by omega⟩ ⟨o + 2, by omega⟩ ⟨o + 3, h⟩ (by simp) (by simp)
-      (by simp) (by simp) (by simp),
+      (by simp) (by simp),
     wire_update, wire_update, wire_mk x o (by omega), wire_mk x (o + 1) (by omega),
     wire_mk x (o + 2) (by omega), wire_mk x (o + 3) h]
 
@@ -263,8 +253,8 @@ theorem centre_eq {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) :
   rw [centre, dif_pos h, ← halves_core_eq_nest N 0 (a - 2), e]
   simp only [List.append_assoc]
 
-/-- **The centre circuit has `6 a + 1` CNOTs.** -/
-theorem cnots_centre {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) : cnots (centre N a) = 6 * a + 1 := by
+/-- **The centre circuit has `6 a - 3` CNOTs.** -/
+theorem cnots_centre {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) : cnots (centre N a) = 6 * a - 3 := by
   have h1 : cnots (centreHead a h) = 1 := rfl
   have h2 : cnots (centreTail a h) = 1 := rfl
   rw [centre_eq h, cnots_append, cnots_append, cnots_nest 0 (a - 2) (by omega), h1, h2]

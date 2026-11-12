@@ -1,5 +1,5 @@
 /-
-The low incrementer on a line (`24 a - 19` CNOTs): its basis action.
+The low incrementer on a line (`24 a - 23` CNOTs): its basis action.
 
 Wires: `S_i = 2a - 2i` (`0 ≤ i ≤ a`), `T_i = 2a - 2i - 1` (`0 ≤ i < a`); `T` is the number
 with bit `i` on `T_i` (`Tval`).  For `2 ≤ a`, `2a < N`, the circuit `lowInc N a` is, up to
@@ -183,11 +183,11 @@ theorem lowIncPerm_wire_zero :
 end spec
 
 /-- **The low incrementer.**  For `2 ≤ a` and `2a < N`, the circuit `lowInc N a` has
-`24 a - 19` CNOTs and unitary one-qubit gates, and it is, up to phases of modulus one, a
+`24 a - 23` CNOTs and unitary one-qubit gates, and it is, up to phases of modulus one, a
 permutation `ρ` of basis states that leaves the even wires `2, …, 2a` and the wires above
 `2a` unchanged, increments `T` modulo `2^a`, and flips wire `0` iff all `T_i` are one. -/
 theorem lowInc_spec {a : ℕ} (h : 2 ≤ a ∧ 2 * a < N) :
-    cnots (lowInc N a) = 24 * a - 19 ∧ UnitaryGates (lowInc N a) ∧
+    cnots (lowInc N a) = 24 * a - 23 ∧ UnitaryGates (lowInc N a) ∧
     ∃ ρ : Equiv.Perm (St N), UMono (circMat (lowInc N a)) ρ ∧ ∀ x : St N,
       (∀ k, 1 ≤ k → k ≤ a → wire (ρ x) (2 * k) = wire x (2 * k)) ∧
       (∀ j, 2 * a < j → wire (ρ x) j = wire x j) ∧
