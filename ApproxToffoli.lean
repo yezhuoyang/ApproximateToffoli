@@ -58,6 +58,12 @@ import ApproxToffoli.Line.TCount
 import ApproxToffoli.Line.TBlocks
 import ApproxToffoli.Line.TInc
 import ApproxToffoli.Line.TMain
+import ApproxToffoli.Line.HelperDefs
+import ApproxToffoli.Line.HelperCells
+import ApproxToffoli.Line.HelperSweep
+import ApproxToffoli.Line.HelperFlags
+import ApproxToffoli.Line.HelperToffoli
+import ApproxToffoli.Line.HelperMain
 import ApproxToffoli.Free.Model
 import ApproxToffoli.Free.Acts
 import ApproxToffoli.Free.QulinDefs
